@@ -6,17 +6,7 @@ import com.willowtreeapps.fuzzywuzzy.diffutils.model.BoundExtractedResult
 import com.willowtreeapps.fuzzywuzzy.diffutils.model.ExtractedResult
 
 
-class Extractor {
-
-    var cutoff: Int = 0
-
-    constructor() {
-        this.cutoff = 0
-    }
-
-    constructor(cutoff: Int) {
-        this.cutoff = cutoff
-    }
+class Extractor(private var cutoff: Int = 0) {
 
     fun with(cutoff: Int): Extractor {
         this.cutoff = cutoff
@@ -35,16 +25,14 @@ class Extractor {
     fun extractWithoutOrder(query: String, choices: Collection<String>,
                             func: Applicable): List<ExtractedResult> {
         val yields = ArrayList<ExtractedResult>()
-        var index = 0
 
-        for (s in choices) {
+        for ((index, s) in choices.withIndex()) {
 
             val score = func.apply(query, s)
 
             if (score >= cutoff) {
                 yields.add(ExtractedResult(s, score, index))
             }
-            index++
         }
 
         return yields
@@ -64,9 +52,8 @@ class Extractor {
                                 toStringFunction: ToStringFunction<T>, func: Applicable): List<BoundExtractedResult<T>> {
 
         val yields = ArrayList<BoundExtractedResult<T>>()
-        var index = 0
 
-        for (t in choices) {
+        for ((index, t) in choices.withIndex()) {
 
             val s = toStringFunction.apply(t)
             val score = func.apply(query, s)
@@ -74,7 +61,6 @@ class Extractor {
             if (score >= cutoff) {
                 yields.add(BoundExtractedResult(t, s, score, index))
             }
-            index++
         }
 
         return yields
@@ -124,7 +110,6 @@ class Extractor {
      */
     fun extractTop(query: String, choices: Collection<String>, func: Applicable): List<ExtractedResult> {
         val best = extractWithoutOrder(query, choices, func)
-//        Collections.sort(best, Collections.reverseOrder())
 
         return best.sortedDescending()
     }
@@ -143,9 +128,6 @@ class Extractor {
                        toStringFunction: ToStringFunction<T>, func: Applicable): List<BoundExtractedResult<T>> {
 
         val best = extractWithoutOrder(query, choices, toStringFunction, func)
-        //TODO check this
-//        Collections.sort(best, Collections.reverseOrder())
-
         return best.sortedDescending()
     }
 
@@ -163,7 +145,6 @@ class Extractor {
         val best = extractWithoutOrder(query, choices, func)
 
         val results = Utils.findTopKHeap(best, limit)
-//        Collections.reverse(results)
 
         return results.sortedDescending()
     }
@@ -185,8 +166,6 @@ class Extractor {
         val best = extractWithoutOrder(query, choices, toStringFunction, func)
 
         val results = Utils.findTopKHeap(best, limit)
-//        Collections.reverse(results)
-
         return results.sortedDescending()
     }
 }

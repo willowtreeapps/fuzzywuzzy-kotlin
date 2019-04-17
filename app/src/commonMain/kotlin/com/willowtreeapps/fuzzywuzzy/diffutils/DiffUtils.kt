@@ -13,7 +13,7 @@ import com.willowtreeapps.fuzzywuzzy.diffutils.structs.OpCode
  */
 object DiffUtils {
 
-    fun getEditOps(s1: String, s2: String): Array<EditOp> {
+    private fun getEditOps(s1: String, s2: String): Array<EditOp> {
         return getEditOps(s1.length, s1, s2.length, s2)
     }
 
@@ -22,19 +22,17 @@ object DiffUtils {
         var len1 = len1
         var len2 = len2
 
-        var len1o: Int
+        var len1o = 0
         val len2o: Int
-        var i: Int
+        var i = 0
 
         val matrix: IntArray
 
-        val c1 = s1//.toCharArray()
-        val c2 = s2//.toCharArray()
+        val c1 = s1
+        val c2 = s2
 
         var p1 = 0
         var p2 = 0
-
-        len1o = 0
 
         while (len1 > 0 && len2 > 0 && c1[p1] == c2[p2]) {
             len1--
@@ -59,7 +57,6 @@ object DiffUtils {
 
         matrix = IntArray(len2 * len1)
 
-        i = 0
         while (i < len2) {
             matrix[i] = i
             i++
@@ -115,24 +112,17 @@ object DiffUtils {
                                       len2: Int, c2: String, p2: Int, o2: Int,
                                       matrix: IntArray): Array<EditOp> {
 
-        var i: Int
-        var j: Int
-        var pos: Int
+        var i: Int = len1 - 1
+        var j: Int = len2 - 1
+        var pos: Int = matrix[len1 * len2 - 1]
 
-        var ptr: Int
+        var ptr: Int = len1 * len2 - 1
 
         val ops: Array<EditOp?>
 
         var dir = 0
 
-        pos = matrix[len1 * len2 - 1]
-
         ops = arrayOfNulls(pos)
-
-        i = len1 - 1
-        j = len2 - 1
-
-        ptr = len1 * len2 - 1
 
         while (i > 0 || j > 0) {
 
@@ -319,12 +309,10 @@ object DiffUtils {
 
         val n = ops.size
 
-        var numberOfMatchingBlocks: Int
+        var numberOfMatchingBlocks: Int = 0
         var i: Int
         var spos: Int
         var dpos: Int
-
-        numberOfMatchingBlocks = 0
 
         var o = 0
 
@@ -352,7 +340,7 @@ object DiffUtils {
 
             }
 
-            type = ops[o]!!.type!!
+            type = ops[o].type!!
 
             when (type) {
                 REPLACE -> do {
@@ -416,7 +404,7 @@ object DiffUtils {
 
             }
 
-            type = ops[o]!!.type!!
+            type = ops[o].type!!
 
             when (type) {
                 REPLACE -> do {

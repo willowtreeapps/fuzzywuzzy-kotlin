@@ -3,6 +3,7 @@ package com.willowtreeapps.fuzzywuzzy.diffutils
 /**
  * A ratio/algorithm that can be applied
  */
+
 interface Applicable {
 
     /**

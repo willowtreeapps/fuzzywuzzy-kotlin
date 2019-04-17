@@ -1,6 +1,6 @@
 package com.willowtreeapps.fuzzywuzzy.diffutils.model
 
-class ExtractedResult(var string: String?, val score: Int, val index: Int) : Comparable<ExtractedResult> {
+data class ExtractedResult(var string: String?, val score: Int, val index: Int) : Comparable<ExtractedResult> {
 
     override fun compareTo(o: ExtractedResult): Int {
         return this.score.compareTo(o.score)

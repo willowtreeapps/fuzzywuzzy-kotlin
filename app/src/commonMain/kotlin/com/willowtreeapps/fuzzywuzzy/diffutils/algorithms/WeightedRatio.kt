@@ -63,9 +63,9 @@ class WeightedRatio : BasicAlgorithm() {
 
     companion object {
 
-        val UNBASE_SCALE = .95
-        val PARTIAL_SCALE = .90
-        val TRY_PARTIALS = true
+        const val UNBASE_SCALE = .95
+        const val PARTIAL_SCALE = .90
+        const val TRY_PARTIALS = true
     }
 
 }
