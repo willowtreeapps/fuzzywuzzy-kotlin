@@ -41,16 +41,16 @@ class PartialRatio : Ratio {
 
         for (mb in matchingBlocks) {
 
-            val dist = mb!!.dpos - mb!!.spos
+            val dist = mb.dpos - mb.spos
 
-            val long_start = if (dist > 0) dist else 0
-            var long_end = long_start + shorter.length
+            val longStart = if (dist > 0) dist else 0
+            var longEnd = longStart + shorter.length
 
-            if (long_end > longer.length) long_end = longer.length
+            if (longEnd > longer.length) longEnd = longer.length
 
-            val long_substr = longer.substring(long_start, long_end)
+            val longSubstr = longer.substring(longStart, longEnd)
 
-            val ratio = DiffUtils.getRatio(shorter, long_substr)
+            val ratio = DiffUtils.getRatio(shorter, longSubstr)
 
             if (ratio > .995) {
                 return 100

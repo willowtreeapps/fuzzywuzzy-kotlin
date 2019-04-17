@@ -9,12 +9,10 @@ import com.willowtreeapps.fuzzywuzzy.diffutils.model.ExtractedResult
 import com.willowtreeapps.fuzzywuzzy.diffutils.ratio.PartialRatio
 import com.willowtreeapps.fuzzywuzzy.diffutils.ratio.SimpleRatio
 
-
 /**
  * FuzzySearch facade class
  */
 object FuzzySearch {
-
 
     /**
      * Calculates a Levenshtein simple ratio between the strings.
@@ -218,7 +216,6 @@ object FuzzySearch {
      * @param s2 Input string
      * @return The ratio of similarity
      */
-//    *
     fun weightedRatio(s1: String, s2: String): Int {
 
         return WeightedRatio().apply(s1, s2)
@@ -234,13 +231,11 @@ object FuzzySearch {
      * calculating the ratio
      * @return The ratio of similarity
      */
-    /*
     fun weightedRatio(s1: String, s2: String, stringFunction: ToStringFunction<String>): Int {
 
         return WeightedRatio().apply(s1, s2, stringFunction)
 
     }
-    */
 
     /**
      * Creates a **sorted** list of [ExtractedResult]  which contain the

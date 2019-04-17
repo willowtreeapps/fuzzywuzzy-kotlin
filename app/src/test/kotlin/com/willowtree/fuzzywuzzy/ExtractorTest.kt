@@ -2,15 +2,17 @@ package com.willowtreeapps.fuzzywuzzy
 
 import com.willowtreeapps.fuzzywuzzy.diffutils.Extractor
 import com.willowtreeapps.fuzzywuzzy.diffutils.algorithms.WeightedRatio
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class ExtractorTest {
 
     lateinit var choices: List<String>
     private lateinit var extractor: Extractor
 
-    @Before
+    @BeforeTest
     fun setUp() {
         choices = listOf("google", "bing", "facebook", "linkedin", "twitter", "googleplus", "bingnews", "plexoogl")
         extractor = Extractor()
@@ -21,8 +23,8 @@ class ExtractorTest {
 
         val res = extractor.extractWithoutOrder("goolge", choices, WeightedRatio())
 
-        assert(res.size == choices.size)
-        assert(res[0].score > 0)
+        assertEquals(res.size, choices.size)
+        assertTrue(res[0].score > 0)
     }
 
     @Test
@@ -30,8 +32,7 @@ class ExtractorTest {
 
         val res = extractor.extractOne("goolge", choices, WeightedRatio())
 
-        assert(res.string == "google")
-
+        assertEquals(res.string, "google")
     }
 
     @Test
@@ -39,7 +40,7 @@ class ExtractorTest {
 
         val res = extractor.extractTop("goolge", choices, WeightedRatio())
 
-        assert(res[0].string == "google" && res[1].string == "googleplus")
+        assertTrue(res[0].string == "google" && res[1].string == "googleplus")
 
     }
 
@@ -48,8 +49,8 @@ class ExtractorTest {
 
         val res = extractor.extractTop("goolge", choices, WeightedRatio(), 3)
 
-        assert(res.size == 3)
-        assert(res[0].string == "google" && res.get(1).string == "googleplus" && res.get(2).string == "plexoogl")
+        assertEquals(res.size, 3)
+        assertTrue(res[0].string == "google" && res.get(1).string == "googleplus" && res.get(2).string == "plexoogl")
 
     }
 }
