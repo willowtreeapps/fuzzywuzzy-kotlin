@@ -2,6 +2,7 @@ package com.willowtreeapps.fuzzywuzzy.diffutils.algorithms
 
 import com.willowtreeapps.fuzzywuzzy.ToStringFunction
 
+expect val pattern: String
 class DefaultStringFunction : ToStringFunction<String> {
 
     /**
@@ -23,7 +24,6 @@ class DefaultStringFunction : ToStringFunction<String> {
 
     companion object {
 
-        private const val pattern = "(?U)[^\\p{Alnum}]"
         private const val nonUnicodePattern = "[^\\p{Alnum}]"
         private val r by lazy {
             try {
