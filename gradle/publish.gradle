@@ -77,7 +77,7 @@ publishing {
     def sonatypePassword = keyProps.getProperty("sonatypePassword")
     publications {
         mavenJava(MavenPublication) {
-//            customizePom(pomConfig)
+            customizePom(pom)
             groupId 'com.willowtreeapps'
             artifactId 'fuzzywuzzy-kotlin'
             version '0.1'
@@ -103,4 +103,63 @@ publishing {
             }
         }
     }
+}
+
+def customizePom(pom) {
+    pom.withXml {
+        def root = asNode()
+
+        // eliminate test-scoped dependencies (no need in maven central POMs)
+        root.dependencies.removeAll { dep ->
+            dep.scope == "test"
+        }
+
+        // add all items necessary for maven central publication
+        root.children().last() + {
+            resolveStrategy = Closure.DELEGATE_FIRST
+
+            description 'Fuzzy String matching - port of python FuzzyWuzzy'
+            name 'FuzzyWuzzy'
+            url 'https://github.com/willowtreeapps/fuzzywuzzy-kotlin'
+            organization {
+                name 'com.github.mautini'
+                url 'https://github.com/mautini'
+            }
+            issueManagement {
+                system 'GitHub'
+                url 'https://github.com/willowtreeapps/fuzzywuzzy-kotlin/issues'
+            }
+            licenses {
+                license {
+                    name 'Apache License 2.0'
+                    url 'https://github.com/willowtreeapps/fuzzywuzzy-kotlin/blob/master/LICENSE'
+                    distribution 'repo'
+                }
+            }
+            scm {
+                url 'https://github.com/mautini/schemaorg-java'
+                connection 'scm:git:git://github.com/willowtreeapps/fuzzywuzzy-kotlin.git'
+                developerConnection 'scm:git:ssh://git@github.com:patjackson52/fuzzywuzzy-kotlin.git'
+            }
+            developers {
+                developer {
+                    name 'Patrick Jackson'
+                }
+            }
+        }
+    }
+}
+model {
+    tasks.generatePomFileForMavenJavaPublication {
+        destination = file("$buildDir/generated-pom.xml")
+    }
+    tasks.publishMavenJavaPublicationToMavenLocal {
+        dependsOn project.tasks.signArchives
+    }
+    tasks.publishMavenJavaPublicationToMavenRepository {
+        dependsOn project.tasks.signArchives
+    }
+}
+signing {
+    sign configurations.archives
 }
