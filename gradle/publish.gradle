@@ -77,12 +77,12 @@ publishing {
     def sonatypePassword = keyProps.getProperty("sonatypePassword")
     publications {
         mavenJava(MavenPublication) {
-            customizePom(pom)
+//            customizePom(pom)
             groupId 'com.willowtreeapps'
             artifactId 'fuzzywuzzy-kotlin'
             version '0.1'
 
-//            from components.java
+            from components.java
 
             /*
             artifact(sourceJar) {
@@ -122,8 +122,8 @@ def customizePom(pom) {
             name 'FuzzyWuzzy'
             url 'https://github.com/willowtreeapps/fuzzywuzzy-kotlin'
             organization {
-                name 'com.github.mautini'
-                url 'https://github.com/mautini'
+                name 'com.willowtreeapps'
+                url 'https://github.com/willowtreeapps'
             }
             issueManagement {
                 system 'GitHub'
@@ -137,7 +137,7 @@ def customizePom(pom) {
                 }
             }
             scm {
-                url 'https://github.com/mautini/schemaorg-java'
+                url 'https://github.com/willowtreeapps/fuzzywuzzy-kotlin'
                 connection 'scm:git:git://github.com/willowtreeapps/fuzzywuzzy-kotlin.git'
                 developerConnection 'scm:git:ssh://git@github.com:patjackson52/fuzzywuzzy-kotlin.git'
             }
@@ -153,13 +153,13 @@ model {
     tasks.generatePomFileForMavenJavaPublication {
         destination = file("$buildDir/generated-pom.xml")
     }
-    tasks.publishMavenJavaPublicationToMavenLocal {
-        dependsOn project.tasks.signArchives
-    }
-    tasks.publishMavenJavaPublicationToMavenRepository {
-        dependsOn project.tasks.signArchives
-    }
+//    tasks.publishMavenJavaPublicationToMavenLocal {
+//        dependsOn project.tasks.signArchives
+//    }
+//    tasks.publishMavenJavaPublicationToMavenRepository {
+//        dependsOn project.tasks.signArchives
+//    }
 }
-signing {
-    sign configurations.archives
-}
+//signing {
+//    sign configurations.archives
+//}
