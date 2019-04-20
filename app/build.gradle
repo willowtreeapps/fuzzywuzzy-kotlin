@@ -1,9 +1,9 @@
 apply plugin: 'java'
 apply plugin: 'kotlin-multiplatform'
+//apply plugin: 'signing'
 apply plugin: 'maven-publish'
-apply plugin: 'signing'
-apply from: rootProject.file('gradle/publish.gradle')
 apply plugin: 'com.moowork.node'
+apply from: rootProject.file('gradle/publish.gradle')
 
 
 final kotlinRuntimeVersion = '1.3.30'
@@ -77,8 +77,8 @@ kotlin {
             }
         }
 
-//        iosSimMain.dependsOn iosMain
-//        iosSimTest.dependsOn iosTest
+        iosSimMain.dependsOn iosMain
+        iosSimTest.dependsOn iosTest
 
     }
 }
