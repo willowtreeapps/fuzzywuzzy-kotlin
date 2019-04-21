@@ -6,7 +6,7 @@ class BoundExtractedResult<T>(val referent: T, var string: String?, val score: I
         return "(string: $string, score: $score, index: $index)"
     }
 
-    override fun compareTo(o: BoundExtractedResult<T>): Int {
-        return this.score.compareTo(o.score)
+    override fun compareTo(other: BoundExtractedResult<T>): Int {
+        return this.score.compareTo(other.score)
     }
 }
