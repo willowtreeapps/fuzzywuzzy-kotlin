@@ -19,8 +19,8 @@ object DiffUtils {
 
 
     private fun getEditOps(len1: Int, s1: String, len2: Int, s2: String): Array<EditOp> {
-        var len1 = len1
-        var len2 = len2
+        var len1Copy = len1
+        var len2Copy = len2
 
         var len1o = 0
         val len2o: Int
@@ -34,9 +34,9 @@ object DiffUtils {
         var p1 = 0
         var p2 = 0
 
-        while (len1 > 0 && len2 > 0 && c1[p1] == c2[p2]) {
-            len1--
-            len2--
+        while (len1Copy > 0 && len2Copy > 0 && c1[p1] == c2[p2]) {
+            len1Copy--
+            len2Copy--
 
             p1++
             p2++
@@ -47,32 +47,32 @@ object DiffUtils {
         len2o = len1o
 
         /* strip common suffix */
-        while (len1 > 0 && len2 > 0 && c1[p1 + len1 - 1] == c2[p2 + len2 - 1]) {
-            len1--
-            len2--
+        while (len1Copy > 0 && len2Copy > 0 && c1[p1 + len1Copy - 1] == c2[p2 + len2Copy - 1]) {
+            len1Copy--
+            len2Copy--
         }
 
-        len1++
-        len2++
+        len1Copy++
+        len2Copy++
 
-        matrix = IntArray(len2 * len1)
+        matrix = IntArray(len2Copy * len1Copy)
 
-        while (i < len2) {
+        while (i < len2Copy) {
             matrix[i] = i
             i++
         }
         i = 1
-        while (i < len1) {
-            matrix[len2 * i] = i
+        while (i < len1Copy) {
+            matrix[len2Copy * i] = i
             i++
         }
 
         i = 1
-        while (i < len1) {
+        while (i < len1Copy) {
 
-            var ptrPrev = (i - 1) * len2
-            var ptrC = i * len2
-            val ptrEnd = ptrC + len2 - 1
+            var ptrPrev = (i - 1) * len2Copy
+            var ptrC = i * len2Copy
+            val ptrEnd = ptrC + len2Copy - 1
 
             val char1 = c1[p1 + i - 1]
             var ptrChar2 = p2
@@ -104,7 +104,7 @@ object DiffUtils {
         }
 
 
-        return editOpsFromCostMatrix(len1, c1, p1, len1o, len2, c2, p2, len2o, matrix)
+        return editOpsFromCostMatrix(len1Copy, c1, p1, len1o, len2Copy, c2, p2, len2o, matrix)
     }
 
 
@@ -229,11 +229,9 @@ object DiffUtils {
 
         val n = ops.size
 
-        var noOfMB: Int
+        var noOfMB = 0
         var i: Int
         var o = 0
-
-        noOfMB = 0
 
         i = n
         while (i-- != 0) {
@@ -309,7 +307,7 @@ object DiffUtils {
 
         val n = ops.size
 
-        var numberOfMatchingBlocks: Int = 0
+        var numberOfMatchingBlocks = 0
         var i: Int
         var spos: Int
         var dpos: Int
@@ -462,14 +460,13 @@ object DiffUtils {
     private fun editOpsToOpCodes(ops: Array<EditOp>, len1: Int, len2: Int): Array<OpCode?> {
 
         val n = ops.size
-        var noOfBlocks: Int
+        var noOfBlocks = 0
         var i: Int
         var spos: Int
         var dpos: Int
         var o = 0
         var type: EditType
 
-        noOfBlocks = 0
         dpos = 0
         spos = dpos
 
@@ -809,9 +806,9 @@ object DiffUtils {
     }
 
     private fun memchr(haystack: String, offset: Int, needle: Char, num: Int): Int {
-        var num = num
+        var numCopy = num
 
-        if (num != 0) {
+        if (numCopy != 0) {
             var p = 0
 
             do {
@@ -821,7 +818,7 @@ object DiffUtils {
 
                 p++
 
-            } while (--num != 0)
+            } while (--numCopy != 0)
 
         }
         return 0

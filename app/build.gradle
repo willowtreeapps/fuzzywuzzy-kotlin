@@ -29,6 +29,9 @@ kotlin {
 
     iosArm64("ios")
     iosX64("iosSim")
+    macosX64("macos")
+    mingwX64("win")
+    wasm32("wasm")
 
     sourceSets {
         commonMain {
@@ -74,6 +77,7 @@ kotlin {
         jsTest {
             dependencies {
                 implementation kotlin("test-js")
+                implementation kotlin("stdlib-js")
             }
         }
 
@@ -97,6 +101,7 @@ dependencies {
     jsLibs "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinRuntimeVersion"
     jsTestLibs "org.jetbrains.kotlin:kotlin-test-js:$kotlinRuntimeVersion"
 }
+
 task copyJsDependencies(type: Copy, dependsOn: compileKotlinJs) {
     configurations.jsLibs.each {
         from zipTree(it.absolutePath).matching { include '*.js'}
@@ -113,6 +118,8 @@ task copyJsTestDependencies(type: Copy) {
 jsTestClasses.dependsOn copyJsTestDependencies
 
  */
+
+
 
 node {
     version = nodeVersion

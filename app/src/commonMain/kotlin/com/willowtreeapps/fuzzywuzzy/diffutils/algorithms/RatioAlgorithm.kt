@@ -34,7 +34,7 @@ abstract class RatioAlgorithm : BasicAlgorithm {
         return apply(s1, s2, ratio, stringFunction!!)
     }
 
-    override fun apply(s1: String, s2: String, stringFunction: ToStringFunction<String>): Int {
-        return apply(s1, s2, ratio!!, stringFunction)
+    override fun apply(s1: String, s2: String, stringProcessor: ToStringFunction<String>): Int {
+        return apply(s1, s2, ratio!!, stringProcessor)
     }
 }
