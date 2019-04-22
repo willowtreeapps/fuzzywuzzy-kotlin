@@ -11,6 +11,7 @@
 /common/build
 /captures
 .externalNativeBuild
+node_modules/
 
 # Created by https://www.gitignore.io/api/swift,xcode
 

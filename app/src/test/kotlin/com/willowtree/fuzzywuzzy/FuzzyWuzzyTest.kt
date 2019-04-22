@@ -1,10 +1,11 @@
-package com.willowtreeapps.fuzzywuzzy;
+package com.willowtreeapps.fuzzywuzzy
 
 
-import com.willowtreeapps.fuzzywuzzy.diffutils.FuzzySearch;
-import com.willowtreeapps.fuzzywuzzy.diffutils.ratio.SimpleRatio;
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import com.willowtreeapps.fuzzywuzzy.diffutils.FuzzySearch
+import com.willowtreeapps.fuzzywuzzy.diffutils.ratio.SimpleRatio
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 
 class FuzzyWuzzyTest {
@@ -70,7 +71,7 @@ class FuzzyWuzzyTest {
 
 
         assertEquals(60, FuzzySearch.weightedRatio("mvn", "wwwwww.mavencentral.comm"))
-        assertEquals(40, FuzzySearch.weightedRatio("mvn", "www;'l3;4;.4;23.4/23.4/234//////www.mavencentral.comm"))
+        assertEquals(40, FuzzySearch.weightedRatio("mvn", "www'l34.423.4/23.4/234//////www.mavencentral.comm"))
         assertEquals(97, FuzzySearch.weightedRatio("The quick brown fox jimps ofver the small lazy dog",
                 "the quick brown fox jumps over the small lazy dog"))
 
@@ -80,15 +81,15 @@ class FuzzyWuzzyTest {
     fun testExtractTop() {
 
         val res = FuzzySearch.extractTop("goolge", choices, 2)
-        val res2 = FuzzySearch.extractTop("goolge", choices, SimpleRatio(), 2);
+        val res2 = FuzzySearch.extractTop("goolge", choices, SimpleRatio(), 2)
 
-        assert(res.size == 2)
-        assert(res.get(0).string == "google" && res.get(1).string == "googleplus")
+        assertEquals(res.size, 2)
+        assertTrue(res.get(0).string == "google" && res.get(1).string == "googleplus")
 
-        assert(res2.size == 2)
-        assert(res2.get(0).string == "google" && res2.get(1).string == "googleplus")
+        assertEquals(res2.size, 2)
+        assertTrue(res2.get(0).string == "google" && res2.get(1).string == "googleplus")
 
-        assert(FuzzySearch.extractTop("goolge", choices, 2, 100).isEmpty())
+        assertTrue(FuzzySearch.extractTop("goolge", choices, 2, 100).isEmpty())
 
     }
 
@@ -97,10 +98,10 @@ class FuzzyWuzzyTest {
 
         val res = FuzzySearch.extractAll("goolge", choices)
 
-        assert(res.size == choices.size)
-        assert(res.get(0).string == "google")
+        assertEquals(res.size, choices.size)
+        assertEquals(res.get(0).string, "google")
 
-        assert(FuzzySearch.extractAll("goolge", choices, 40).size == 3)
+        assertEquals(FuzzySearch.extractAll("goolge", choices, 40).size, 3)
 
     }
 
@@ -109,11 +110,11 @@ class FuzzyWuzzyTest {
 
         val res = FuzzySearch.extractSorted("goolge", choices)
 
-        assert(res.size == choices.size)
-        assert(res.get(0).string == "google")
-        assert(res.get(1).string == "googleplus")
+        assertEquals(res.size, choices.size)
+        assertEquals(res.get(0).string, "google")
+        assertEquals(res.get(1).string, "googleplus")
 
-        assert(FuzzySearch.extractSorted("goolge", choices, 40).size == 3)
+        assertEquals(FuzzySearch.extractSorted("goolge", choices, 40).size, 3)
 
     }
 
@@ -125,9 +126,9 @@ class FuzzyWuzzyTest {
         val res2 = FuzzySearch.extractOne("twiter", choices)
         val res3 = FuzzySearch.extractOne("cowboys", moreChoices)
 
-        assert(res.string == "twitter")
-        assert(res2.string == "twitter")
-        assert(res3.string == "Dallas Cowboys" && res3.score == 90)
+        assertEquals(res.string, "twitter")
+        assertEquals(res2.string, "twitter")
+        assertTrue(res3.string == "Dallas Cowboys" && res3.score == 90)
 
 
     }

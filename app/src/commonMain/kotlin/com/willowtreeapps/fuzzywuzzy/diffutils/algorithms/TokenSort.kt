@@ -15,11 +15,11 @@ class TokenSort : RatioAlgorithm() {
 
     }
 
-    private fun processAndSort(`in`: String, stringProcessor: ToStringFunction<String>): String {
-        var `in` = `in`
+    private fun processAndSort(input: String, stringProcessor: ToStringFunction<String>): String {
+        var inputCopy = input
 
-        `in` = stringProcessor.apply(`in`)
-        val wordsArray = `in`.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        inputCopy = stringProcessor.apply(inputCopy)
+        val wordsArray = inputCopy.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
 
         val words = listOf(*wordsArray)
         val joined = Utils.sortAndJoin(words, " ")
