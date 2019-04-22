@@ -1,165 +1,137 @@
-/*
- * Copyright 2018 Russell Wolf
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+apply plugin: 'org.jetbrains.dokka'
 
-def pomConfig = {
-    licenses {
-        license {
-            name "The Apache Software License, Version 2.0"
-            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-            distribution "repo"
+
+dokka {
+    impliedPlatforms = ["Common"] // This will force platform tags for all non-common sources e.g. "JVM"
+    kotlinTasks {
+        // dokka fails to retrieve sources from MPP-tasks so they must be set empty to avoid exception
+        // use sourceRoot instead (see below)
+        []
+    }
+    packageOptions {
+        prefix = "com.willowtreeapps.fuzzywuzzy"
+        suppress = true
+    }
+    sourceRoot {
+        // assuming there is only a single source dir...
+        path = kotlin.sourceSets.commonMain.kotlin.srcDirs[0]
+        platforms = ["Common"]
+    }
+    if (kotlin.sourceSets.getNames().contains("jvmMain")) {
+        sourceRoot {
+            // assuming there is only a single source dir...
+            path = kotlin.sourceSets.jvmMain.kotlin.srcDirs[0]
+            platforms = ["JVM"]
         }
     }
-    developers {
-        developer {
-            id "patjackson52"
-            name "Patrick Jackson"
+    if (kotlin.sourceSets.getNames().contains("jsMain")) {
+        sourceRoot {
+            // assuming there is only a single source dir...
+            path = kotlin.sourceSets.jsMain.kotlin.srcDirs[0]
+            platforms = ["js"]
         }
     }
-    scm {
-        url "https://github.com/willowtreeapps/fuzzywuzzy-kotlin"
-    }
-}
-
-/*
-bintray {
-    def keyProps = new Properties()
-    def keyFile = file("../local.properties")
-    if (keyFile.exists()) keyFile.withInputStream { keyProps.load(it) }
-
-    user = keyProps.getProperty("bintrayUser")
-    key = keyProps.getProperty("bintrayKey")
-
-    pkg {
-        userOrg = 'willowtreeapps'
-        repo = 'fuzzywuzzy-kotlin'
-        name = "fuzzywuzzy-kotlin"
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/willowtreeapps/fuzzywuzzy-kotlin'
-    }
-}
-*/
-
-afterEvaluate {
-    project.publishing.publications.forEach { publication ->
-        publication.pom.withXml {
-            def root = asNode()
-            root.appendNode('name', project.name)
-            root.appendNode('description', 'Fuzzy string matching for Kotlin multiplatform')
-            root.appendNode('url', 'https://github.com/willowtreeapps/fuzzywuzzy-kotlin')
-            root.children().last() + pomConfig
+    if (kotlin.sourceSets.getNames().contains("nativeMain")) {
+        sourceRoot {
+            // assuming there is only a single source dir...
+            path = kotlin.sourceSets.nativeMain.kotlin.srcDirs[0]
+            platforms = ["native"]
         }
     }
 }
 
-//bintrayUpload.doFirst {
-//    publications = project.publishing.publications
-//}
+def isReleaseBuild() {
+    return VERSION_NAME.contains("SNAPSHOT") == false
+}
+
+def getReleaseRepositoryUrl() {
+    return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL :
+            "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+}
+
+def getSnapshotRepositoryUrl() {
+    return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL :
+            "https://oss.sonatype.org/content/repositories/snapshots/"
+}
+
+def getRepositoryUsername() {
+    return hasProperty('SONATYPE_NEXUS_USERNAME') ? SONATYPE_NEXUS_USERNAME : ""
+}
+
+def getRepositoryPassword() {
+    return hasProperty('SONATYPE_NEXUS_PASSWORD') ? SONATYPE_NEXUS_PASSWORD : ""
+}
+
+task emptySourcesJar(type: Jar) {
+    classifier = 'sources'
+}
+
+task javadocsJar(type: Jar, dependsOn: dokka) {
+    classifier = 'javadoc'
+    from dokka.outputDirectory
+}
+
+signing {
+    required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
+    sign(publishing.publications)
+}
 
 publishing {
-    def keyProps = new Properties()
-    def keyFile = file("../local.properties")
-    if (keyFile.exists()) keyFile.withInputStream { keyProps.load(it) }
+    publications.all {
+        artifact javadocsJar
 
-    def sonatypeUsername = keyProps.getProperty("sonatypeUsername")
-    def sonatypePassword = keyProps.getProperty("sonatypePassword")
-    publications {
-        mavenJava(MavenPublication) {
-//            customizePom(pom)
-            groupId 'com.willowtreeapps'
-            artifactId 'fuzzywuzzy-kotlin'
-            version '0.1'
+        pom.withXml {
+            def root = asNode()
 
-            from components.java
+            root.children().last() + {
+                resolveStrategy = Closure.DELEGATE_FIRST
 
-            /*
-            artifact(sourceJar) {
-                classifier = 'sources'
+                description POM_DESCRIPTION
+                name POM_NAME
+                url POM_URL
+                licenses {
+                    license {
+                        name POM_LICENCE_NAME
+                        url POM_LICENCE_URL
+                        distribution POM_LICENCE_DIST
+                    }
+                }
+                scm {
+                    url POM_SCM_URL
+                    connection POM_SCM_CONNECTION
+                    developerConnection POM_SCM_DEV_CONNECTION
+                }
+                developers {
+                    developer {
+                        id POM_DEVELOPER_ID
+                        name POM_DEVELOPER_NAME
+                    }
+                }
             }
-            artifact(javadocJar) {
-                classifier = 'javadoc'
-            }
-            */
         }
     }
+
+    afterEvaluate {
+        publications.getByName('kotlinMultiplatform') {
+            // Source jars are only created for platforms, not the common artifact.
+            artifact emptySourcesJar
+        }
+    }
+
     repositories {
         maven {
-            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            url isReleaseBuild() ? getReleaseRepositoryUrl() : getSnapshotRepositoryUrl()
             credentials {
-                username sonatypeUsername
-                password sonatypePassword
+                username getRepositoryUsername()
+                password getRepositoryPassword()
             }
+        }
+        maven {
+            name 'test'
+            url "file://${rootProject.buildDir}/localMaven"
         }
     }
 }
-
-def customizePom(pom) {
-    pom.withXml {
-        def root = asNode()
-
-        // eliminate test-scoped dependencies (no need in maven central POMs)
-        root.dependencies.removeAll { dep ->
-            dep.scope == "test"
-        }
-
-        // add all items necessary for maven central publication
-        root.children().last() + {
-            resolveStrategy = Closure.DELEGATE_FIRST
-
-            description 'Fuzzy String matching - port of python FuzzyWuzzy'
-            name 'FuzzyWuzzy'
-            url 'https://github.com/willowtreeapps/fuzzywuzzy-kotlin'
-            organization {
-                name 'com.willowtreeapps'
-                url 'https://github.com/willowtreeapps'
-            }
-            issueManagement {
-                system 'GitHub'
-                url 'https://github.com/willowtreeapps/fuzzywuzzy-kotlin/issues'
-            }
-            licenses {
-                license {
-                    name 'Apache License 2.0'
-                    url 'https://github.com/willowtreeapps/fuzzywuzzy-kotlin/blob/master/LICENSE'
-                    distribution 'repo'
-                }
-            }
-            scm {
-                url 'https://github.com/willowtreeapps/fuzzywuzzy-kotlin'
-                connection 'scm:git:git://github.com/willowtreeapps/fuzzywuzzy-kotlin.git'
-                developerConnection 'scm:git:ssh://git@github.com:patjackson52/fuzzywuzzy-kotlin.git'
-            }
-            developers {
-                developer {
-                    name 'Patrick Jackson'
-                }
-            }
-        }
-    }
-}
-model {
-    tasks.generatePomFileForMavenJavaPublication {
-        destination = file("$buildDir/generated-pom.xml")
-    }
-//    tasks.publishMavenJavaPublicationToMavenLocal {
-//        dependsOn project.tasks.signArchives
-//    }
-//    tasks.publishMavenJavaPublicationToMavenRepository {
-//        dependsOn project.tasks.signArchives
-//    }
-}
-//signing {
-//    sign configurations.archives
-//}

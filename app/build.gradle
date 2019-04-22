@@ -1,21 +1,16 @@
 apply plugin: 'java'
 apply plugin: 'kotlin-multiplatform'
-//apply plugin: 'signing'
-apply plugin: 'maven-publish'
 apply plugin: 'com.moowork.node'
-apply from: rootProject.file('gradle/publish.gradle')
 
-
-final kotlinRuntimeVersion = '1.3.30'
+archivesBaseName = 'fuzzywuzzy-kotlin'
 
 group 'com.willowtreeapps'
-version '0.1'
+version '0.1.1'
 final nodeVersion = '11.2.0'
 final nodeWorkingDir = project.buildDir
 final nodeModules = "$nodeWorkingDir/node_modules"
 final mochaVersion = '5.2.0'
 final pathSeparator = System.properties["path.separator"]
-
 
 kotlin {
     jvm()
@@ -23,6 +18,8 @@ kotlin {
         [compileKotlinJs, compileTestKotlinJs].each { configuration ->
             configuration.kotlinOptions {
                 moduleKind = 'umd'
+                sourceMap = true
+                metaInfo = true
             }
         }
     }
@@ -80,10 +77,16 @@ kotlin {
                 implementation kotlin("stdlib-js")
             }
         }
+        nativeMain {
+            kotlin.srcDir('src/nativeMain/kotlin')
+        }
 
         iosSimMain.dependsOn iosMain
         iosSimTest.dependsOn iosTest
 
+        configure([targets.ios, targets.iosSim, targets.macos, targets.win]) {
+            compilations.main.source(sourceSets.nativeMain)
+        }
     }
 }
 
@@ -154,4 +157,33 @@ tasks.check.dependsOn iosTest
 //configurations {
 //    compileClasspath
 //}
+
+afterEvaluate {
+    // Alias the task names we use elsewhere to the new task names.
+    tasks.create('installMP').dependsOn('publishKotlinMultiplatformPublicationToMavenLocal')
+    tasks.create('installLocally') {
+        dependsOn 'publishKotlinMultiplatformPublicationToTestRepository'
+        dependsOn 'publishJvmPublicationToTestRepository'
+        dependsOn 'publishJsPublicationToTestRepository'
+        dependsOn 'publishMetadataPublicationToTestRepository'
+    }
+    tasks.create('installIosLocally') {
+        dependsOn 'publishKotlinMultiplatformPublicationToTestRepository'
+        dependsOn 'publishIosArm32PublicationToTestRepository'
+        dependsOn 'publishIosArm64PublicationToTestRepository'
+        dependsOn 'publishIosX64PublicationToTestRepository'
+        dependsOn 'publishMetadataPublicationToTestRepository'
+    }
+    // NOTE: We do not alias uploadArchives because CI runs it on Linux and we only want to run it on Mac OS.
+    //tasks.create('uploadArchives').dependsOn('publishKotlinMultiplatformPublicationToMavenRepository')
+}
+
+apply from: rootProject.file('gradle/publish.gradle')
+
+publishing {
+    publications.all {
+        // Rewrite all artifacts from using the project name to just 'runtime'.
+        artifactId = artifactId.replace(project.name, 'fuzzywuzzy-kotlin')
+    }
+}
 
