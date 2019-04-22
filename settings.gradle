@@ -13,3 +13,6 @@ rootProject.name='FuzzyWuzzy'
 
 
 rootProject.name = 'test'
+enableFeaturePreview('GRADLE_METADATA')
+enableFeaturePreview('STABLE_PUBLISHING')
+

@@ -24,7 +24,7 @@ package com.willowtreeapps.fuzzywuzzy.diffutils
 
 import kotlin.Comparator
 
-class PriorityQueue<T>(size: Int, val comparator: Comparator<T?>? = null) : Collection<T> {
+class PriorityQueue<T>(size: Int, private val comparator: Comparator<T?>? = null) : Collection<T> {
     override var size: Int = 0
         private set
     private var arr: Array<T?> = Array<Comparable<T>?>(size) { null } as Array<T?>
