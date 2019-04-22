@@ -1,34 +1,34 @@
-apply plugin: 'com.android.library'
+apply plugin: 'java'
 apply plugin: 'kotlin-multiplatform'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
-apply from: rootProject.file('gradle/publish.gradle')
+apply plugin: 'com.moowork.node'
+
+archivesBaseName = 'fuzzywuzzy-kotlin'
 
 group 'com.willowtreeapps'
-version '0.1'
+version '0.1.1'
+final nodeVersion = '11.2.0'
+final nodeWorkingDir = project.buildDir
+final nodeModules = "$nodeWorkingDir/node_modules"
+final mochaVersion = '5.2.0'
+final pathSeparator = System.properties["path.separator"]
 
 kotlin {
-    android {
-        compilations.all {
-            tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) { task ->
-                kotlinOptions {
-                    freeCompilerArgs = ['-Xuse-experimental=kotlin.Experimental']
-                }
+    jvm()
+    js() {
+        [compileKotlinJs, compileTestKotlinJs].each { configuration ->
+            configuration.kotlinOptions {
+                moduleKind = 'umd'
+                sourceMap = true
+                metaInfo = true
             }
         }
-        publishLibraryVariants("release")
     }
+
     iosArm64("ios")
     iosX64("iosSim")
-
-    targets.all { target ->
-        if (target.name == 'android') return // Android handles this differently
-        compilations.all { compilation ->
-            tasks[compileKotlinTaskName].kotlinOptions {
-                freeCompilerArgs = ['-Xuse-experimental=kotlin.Experimental']
-            }
-        }
-    }
+    macosX64("macos")
+    mingwX64("win")
+    wasm32("wasm")
 
     sourceSets {
         commonMain {
@@ -37,43 +37,110 @@ kotlin {
             }
         }
         commonTest {
+            kotlin.srcDir('src/test')
             dependencies {
                 implementation kotlin("test-common")
                 implementation kotlin("test-annotations-common")
             }
         }
 
-        androidMain {
+        jvmMain {
+            kotlin.srcDir('src/jvmMain/kotlin')
             dependencies {
                 implementation kotlin("stdlib")
             }
         }
-        androidTest {
+        jvmTest {
             dependencies {
                 implementation kotlin("test")
                 implementation kotlin("test-junit")
                 implementation 'junit:junit:4.12'
-                implementation "androidx.test:core:1.1.0"
-                implementation "androidx.test.ext:junit:1.1.0"
-                implementation "org.robolectric:robolectric:4.0"
             }
+        }
+        jsMain {
+            kotlin.srcDir('src/jsMain/kotlin')
+            dependencies {
+                implementation kotlin("stdlib-js")
+            }
+            compileKotlinJs {
+                kotlinOptions.metaInfo = true
+                kotlinOptions.sourceMap = true
+                kotlinOptions.suppressWarnings = true
+                kotlinOptions.verbose = true
+                kotlinOptions.main = "call"
+                kotlinOptions.moduleKind = "umd"
+            }
+        }
+        jsTest {
+            dependencies {
+                implementation kotlin("test-js")
+                implementation kotlin("stdlib-js")
+            }
+        }
+        nativeMain {
+            kotlin.srcDir('src/nativeMain/kotlin')
         }
 
         iosSimMain.dependsOn iosMain
         iosSimTest.dependsOn iosTest
 
+        configure([targets.ios, targets.iosSim, targets.macos, targets.win]) {
+            compilations.main.source(sourceSets.nativeMain)
+        }
     }
 }
 
-android {
-    compileSdkVersion 28
+//Workaround to copy kotlin libraries so they are visible during testing
+def jsLibDir = "$compileKotlinJs.destinationDir/lib"
+def jsTestLibDir = "$compileTestKotlinJs.destinationDir/lib"
 
-    defaultConfig {
-        minSdkVersion 15
-    }
-
-    testOptions.unitTests.includeAndroidResources = true
+//uncomment below to test JS.  This conflicts with iOS config
+/*
+configurations {
+    jsLibs
+    jsTestLibs
 }
+dependencies {
+    jsLibs "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinRuntimeVersion"
+    jsTestLibs "org.jetbrains.kotlin:kotlin-test-js:$kotlinRuntimeVersion"
+}
+
+task copyJsDependencies(type: Copy, dependsOn: compileKotlinJs) {
+    configurations.jsLibs.each {
+        from zipTree(it.absolutePath).matching { include '*.js'}
+    }
+    into jsLibDir
+}
+jsMainClasses.dependsOn copyJsDependencies
+task copyJsTestDependencies(type: Copy) {
+    configurations.jsTestLibs.each {
+        from zipTree(it.absolutePath).matching { include '*.js'}
+    }
+    into jsTestLibDir
+}
+jsTestClasses.dependsOn copyJsTestDependencies
+
+ */
+
+
+
+node {
+    version = nodeVersion
+    download = true
+    workDir = file("$project.buildDir/nodejs")
+    nodeModulesDir = file(nodeWorkingDir)
+}
+task installMocha(type: NpmTask, group: 'npm') {
+    outputs.dir "$nodeModules/mocha"
+    args = ['install', "mocha@$mochaVersion"]
+}
+task runMocha(type: NodeTask, dependsOn: [installMocha, jsMainClasses, jsTestClasses], group: 'npm') {
+    environment = ["NODE_PATH": "$jsLibDir$pathSeparator$jsTestLibDir$pathSeparator$compileKotlinJs.destinationDir"]
+    script = file("$nodeWorkingDir/node_modules/mocha/bin/mocha")
+    args = [compileTestKotlinJs.outputFile]
+}
+//Use mocha to run js tests
+jsTest.dependsOn runMocha
 
 task iosTest(dependsOn: 'linkTestDebugExecutableIosSim') {
     doLast {
@@ -83,10 +150,40 @@ task iosTest(dependsOn: 'linkTestDebugExecutableIosSim') {
         }
     }
 }
+
 tasks.check.dependsOn iosTest
 
 // workaround for https://youtrack.jetbrains.com/issue/KT-27170
-configurations {
-    compileClasspath
+//configurations {
+//    compileClasspath
+//}
+
+afterEvaluate {
+    // Alias the task names we use elsewhere to the new task names.
+    tasks.create('installMP').dependsOn('publishKotlinMultiplatformPublicationToMavenLocal')
+    tasks.create('installLocally') {
+        dependsOn 'publishKotlinMultiplatformPublicationToTestRepository'
+        dependsOn 'publishJvmPublicationToTestRepository'
+        dependsOn 'publishJsPublicationToTestRepository'
+        dependsOn 'publishMetadataPublicationToTestRepository'
+    }
+    tasks.create('installIosLocally') {
+        dependsOn 'publishKotlinMultiplatformPublicationToTestRepository'
+        dependsOn 'publishIosArm32PublicationToTestRepository'
+        dependsOn 'publishIosArm64PublicationToTestRepository'
+        dependsOn 'publishIosX64PublicationToTestRepository'
+        dependsOn 'publishMetadataPublicationToTestRepository'
+    }
+    // NOTE: We do not alias uploadArchives because CI runs it on Linux and we only want to run it on Mac OS.
+    //tasks.create('uploadArchives').dependsOn('publishKotlinMultiplatformPublicationToMavenRepository')
+}
+
+apply from: rootProject.file('gradle/publish.gradle')
+
+publishing {
+    publications.all {
+        // Rewrite all artifacts from using the project name to just 'runtime'.
+        artifactId = artifactId.replace(project.name, 'fuzzywuzzy-kotlin')
+    }
 }
 

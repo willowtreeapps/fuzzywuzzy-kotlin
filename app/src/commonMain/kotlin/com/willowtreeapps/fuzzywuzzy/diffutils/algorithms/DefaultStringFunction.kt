@@ -2,28 +2,20 @@ package com.willowtreeapps.fuzzywuzzy.diffutils.algorithms
 
 import com.willowtreeapps.fuzzywuzzy.ToStringFunction
 
+expect val pattern: String
+
 class DefaultStringFunction : ToStringFunction<String> {
 
     /**
-     * Performs the default string processing on the input string
+     * Performs the default string processing on the item string
      *
-     * @param in Input string
+     * @param `item` Input string
      * @return The processed string
      */
-    override fun apply(`in`: String): String {
-        var `in` = `in`
-
-        `in` = subNonAlphaNumeric(`in`, " ")
-        `in` = `in`.toLowerCase()
-        `in` = `in`.trim { it <= ' ' }
-
-        return `in`
-
-    }
+    override fun apply(item: String) = subNonAlphaNumeric(item, " ").toLowerCase().trim { it <= ' ' }
 
     companion object {
 
-        private const val pattern = "(?U)[^\\p{Alnum}]"
         private const val nonUnicodePattern = "[^\\p{Alnum}]"
         private val r by lazy {
             try {

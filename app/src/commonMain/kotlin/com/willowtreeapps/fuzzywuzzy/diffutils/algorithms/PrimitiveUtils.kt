@@ -4,7 +4,7 @@ internal object PrimitiveUtils {
 
     fun max(vararg elems: Double): Double {
 
-        if (elems.size == 0) return 0.0
+        if (elems.isEmpty()) return 0.0
 
         var best = elems[0]
 

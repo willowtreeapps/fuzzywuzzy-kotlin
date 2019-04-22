@@ -54,7 +54,7 @@ object Utils {
         for (x in arr) {
             if (pq.size < k)
                 pq.add(x)
-            else if (x.compareTo(pq.peek()) > 0) {
+            else if (x > pq.peek()) {
                 pq.poll()
                 pq.add(x)
             }
@@ -62,12 +62,9 @@ object Utils {
         val res = ArrayList<T>()
         try {
             for (i in k downTo 1) {
-                val polled = pq.poll()
-                if (polled != null) {
-                    res.add(polled)
-                }
+                res.add(pq.poll())
             }
-        } catch (e: Exception) {
+        } catch (e: NoSuchElementException) {
 
         }
         return res
@@ -76,7 +73,7 @@ object Utils {
 
     internal fun <T : Comparable<T>> max(vararg elems: T): T? {
 
-        if (elems.size == 0) return null
+        if (elems.isEmpty()) return null
 
         var best = elems[0]
 

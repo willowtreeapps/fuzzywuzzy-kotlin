@@ -16,14 +16,14 @@ class WeightedRatio : BasicAlgorithm() {
 
 
     override fun apply(s1: String, s2: String, stringProcessor: ToStringFunction<String>): Int {
-        var s1 = s1
-        var s2 = s2
+        var s1Copy = s1
+        var s2Copy = s2
 
-        s1 = stringProcessor.apply(s1)
-        s2 = stringProcessor.apply(s2)
+        s1Copy = stringProcessor.apply(s1Copy)
+        s2Copy = stringProcessor.apply(s2Copy)
 
-        val len1 = s1.length
-        val len2 = s2.length
+        val len1 = s1Copy.length
+        val len2 = s2Copy.length
 
         if (len1 == 0 || len2 == 0) {
             return 0
@@ -33,7 +33,7 @@ class WeightedRatio : BasicAlgorithm() {
         val unbaseScale = UNBASE_SCALE
         var partialScale = PARTIAL_SCALE
 
-        val base = ratio(s1, s2)
+        val base = ratio(s1Copy, s2Copy)
         val lenRatio = max(len1, len2).toDouble() / min(len1, len2)
 
         // if strings are similar length don't use partials
@@ -44,16 +44,16 @@ class WeightedRatio : BasicAlgorithm() {
 
         if (tryPartials) {
 
-            val partial = partialRatio(s1, s2) * partialScale
-            val partialSor = tokenSortPartialRatio(s1, s2) * unbaseScale * partialScale
-            val partialSet = tokenSetPartialRatio(s1, s2) * unbaseScale * partialScale
+            val partial = partialRatio(s1Copy, s2Copy) * partialScale
+            val partialSor = tokenSortPartialRatio(s1Copy, s2Copy) * unbaseScale * partialScale
+            val partialSet = tokenSetPartialRatio(s1Copy, s2Copy) * unbaseScale * partialScale
 
             return round(max(max(max(base.toDouble(), partial), partialSor), partialSet)).toInt()
 
         } else {
 
-            val tokenSort = tokenSortRatio(s1, s2) * unbaseScale
-            val tokenSet = tokenSetRatio(s1, s2) * unbaseScale
+            val tokenSort = tokenSortRatio(s1Copy, s2Copy) * unbaseScale
+            val tokenSet = tokenSetRatio(s1Copy, s2Copy) * unbaseScale
 
             return round(max(max(base.toDouble(), tokenSort), tokenSet)).toInt()
 

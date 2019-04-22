@@ -24,10 +24,10 @@ package com.willowtreeapps.fuzzywuzzy.diffutils
 
 import kotlin.Comparator
 
-class PriorityQueue<T>(size: Int, val comparator: Comparator<T?>? = null) : Collection<T> {
+class PriorityQueue<T>(size: Int, private val comparator: Comparator<T?>? = null) : Collection<T> {
     override var size: Int = 0
         private set
-    private var arr: Array<T?> = Array<Comparable<T>?>(size, { null }) as Array<T?>
+    private var arr: Array<T?> = Array<Comparable<T>?>(size) { null } as Array<T?>
 
     fun add(element: T) {
         if (size + 1 == arr.size) {
@@ -93,11 +93,11 @@ class PriorityQueue<T>(size: Int, val comparator: Comparator<T?>? = null) : Coll
 
     companion object {
         private fun<T> greater(arr: Array<T>, i: Int, j: Int, comparator: Comparator<T>? = null): Boolean {
-            if (comparator != null) {
-                return comparator.compare(arr[i], arr[j]) > 0
+            return if (comparator != null) {
+                comparator.compare(arr[i], arr[j]) > 0
             } else {
                 val left = arr[i]!! as Comparable<T>
-                return left > arr[j]!!
+                left > arr[j]!!
             }
         }
 
