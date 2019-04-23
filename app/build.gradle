@@ -29,6 +29,10 @@ kotlin {
     macosX64("macos")
     mingwX64("win")
     wasm32("wasm")
+    linuxArm32Hfp("linArm32")
+    linuxMips32("linMips32")
+    linuxMipsel32("linMipsel32")
+    linuxX64("lin64")
 
     sourceSets {
         commonMain {
@@ -84,7 +88,7 @@ kotlin {
         iosSimMain.dependsOn iosMain
         iosSimTest.dependsOn iosTest
 
-        configure([targets.ios, targets.iosSim, targets.macos, targets.win]) {
+        configure([targets.ios, targets.iosSim, targets.macos, targets.win, targets.linArm32, targets.linMips32, targets.linMipsel32, targets.lin64]) {
             compilations.main.source(sourceSets.nativeMain)
         }
     }
