@@ -23,7 +23,7 @@ To add to project in the common module add the dependency:
 sourceSets {
   commonMain {
       dependencies {
-          implementation "com.willowtreeapps:fuzzywuzzy-kotlin:0.1.1"
+          implementation "com.willowtreeapps:fuzzywuzzy-kotlin:0.9.0"
       }
    }
 }
